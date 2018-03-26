@@ -4,14 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/background_light"
     tools:context="ozog.szumlanski.development.arduino_android_robot_mapping.MappingDisplay">
 
     <ImageView
         android:id="@+id/arduino"
-        android:layout_width="5px"
-        android:layout_height="5px"
+        android:layout_width="200px"
+        android:layout_height="200px"
         android:layout_centerInParent="true"
 
-        app:srcCompat="@android:color/background_dark" />
+        app:srcCompat="@drawable/arduino_image" />
 
 </RelativeLayout>

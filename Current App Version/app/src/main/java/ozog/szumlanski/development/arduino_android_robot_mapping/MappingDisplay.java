@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.ImageView;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.lang.*;
 
 public class MappingDisplay extends AppCompatActivity {
 
@@ -41,7 +42,7 @@ public class MappingDisplay extends AppCompatActivity {
                     }
                 });
             }
-        }, 0, 2000);
+        }, 0, 1000);
     }
 
     @Override
@@ -69,25 +70,26 @@ public class MappingDisplay extends AppCompatActivity {
         if (nextPosition != null && nextPosition.x == 0) {
             newRotation = currentRotation + nextPosition.y;
             arduino.setRotation(newRotation);
-            Log.d("Rotation: ", Float.toString(currentRotation));
         }
         // Straight movement
         else if (nextPosition != null && nextPosition.y == 0) {
             newX = x + calculateArduinoCoordsToCartesianCoords(nextPosition.x, (int)currentRotation).x;
-            newY = y + calculateArduinoCoordsToCartesianCoords(nextPosition.x, (int)currentRotation).y;
+            newY = y - calculateArduinoCoordsToCartesianCoords(nextPosition.x, (int)currentRotation).y;
             arduino.setX(newX);
             arduino.setY(newY);
-            Log.d("New X: ", Float.toString(newX));
-            Log.d("New Y: ", Float.toString(newY));
         }
+
+        Log.d("New X: ", Float.toString(arduino.getX() + 50));
+        Log.d("New Y: ", Float.toString(arduino.getY() + 50));
+        Log.d("BREAK: ", "---------");
     }
 
     public static Point calculateArduinoCoordsToCartesianCoords(int distanceDelta, int currentRotation) {
 
         double x, y;
 
-        x = Math.sin(currentRotation) * distanceDelta;
-        y = Math.cos(currentRotation) * -distanceDelta;
+        x = Math.sin(Math.toRadians(currentRotation)) * distanceDelta;
+        y = Math.cos(Math.toRadians(currentRotation)) * distanceDelta;
 
         Point cartesianCoords = new Point((int)x, (int)y);
         return cartesianCoords;

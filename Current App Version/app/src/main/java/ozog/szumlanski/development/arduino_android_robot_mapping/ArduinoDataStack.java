@@ -39,5 +39,14 @@ public class ArduinoDataStack {
         dataStack.add(new Point(0, 90));
         dataStack.add(new Point(200, 0));
         dataStack.add(new Point(0, 90));
+        dataStack.add(new Point(200, 0));
+        dataStack.add(new Point(200, 0));
+        dataStack.add(new Point(0, 90));
+        dataStack.add(new Point(200, 0));
+        dataStack.add(new Point(0, 90));
+        dataStack.add(new Point(200, 0));
+        dataStack.add(new Point(0, 90));
+        dataStack.add(new Point(200, 0));
+        dataStack.add(new Point(0, 90));
     }
 }

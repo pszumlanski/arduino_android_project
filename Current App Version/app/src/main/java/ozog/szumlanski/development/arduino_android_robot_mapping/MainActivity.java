@@ -63,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
         ListDevices = new ArrayList<BluetoothDevice>();
         devicesList = new ArrayList<String>();
-        adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.activity_main, R.id.availableDevicesList, devicesList);
+
+        adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.list_item, R.id.txtlist, devicesList);
         availableDevicesList.setAdapter(adapter);
 
 
@@ -169,11 +170,11 @@ public class MainActivity extends AppCompatActivity {
         myBluetooth.startDiscovery();
         if (status)
         {
-            bluetoothstatus.setText("ENABLED");
+            bluetoothstatus.setText("Bluetooth State:   Enabled");
             registerReceiver(mReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
         }
         else {
-            bluetoothstatus.setText("NOT READY");
+            bluetoothstatus.setText("Bluetooth State:   Not ready");
         }
     }
 
@@ -185,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
             blsocket = device.createInsecureRfcommSocketToServiceRecord(uuid);
             blsocket.connect();
             pairedBluetoothDevice = device;
-            bluetoothPaired.setText("PAIRED: "+device.getName());
+            bluetoothPaired.setText("Bluetooth Paired with Device: "+device.getName());
             bluetoothPaired.setTextColor(getResources().getColor(R.color.green));
 
             Toast.makeText(getApplicationContext(), "Device paired successfully!",Toast.LENGTH_LONG).show();
@@ -228,10 +229,8 @@ public class MainActivity extends AppCompatActivity {
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver()
     {
-
         public void onReceive(Context context, Intent intent)
         {
-
             Log.i("app>", "broadcast received") ;
             String action = intent.getAction();
 
