@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Toast.makeText(getApplicationContext(), "item with address: " + devicesList.get(i) + " clicked", Toast.LENGTH_LONG).show();
 
-                connect2LED(ListDevices.get(i));
+                pairDevices(ListDevices.get(i));
             }
         });
     }
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    void connect2LED(BluetoothDevice device)
+    void pairDevices(BluetoothDevice device)
     {
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb") ;
         try {
