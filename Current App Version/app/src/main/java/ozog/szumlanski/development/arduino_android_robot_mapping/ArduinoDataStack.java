@@ -6,19 +6,19 @@ import java.util.List;
 
 public class ArduinoDataStack {
 
-    private static List<Point> dataStack;
+    private static List<Spot> dataStack;
 
     static {
         dataStack = new LinkedList<>();
     }
 
-    public static void addRecord(int distanceDelta, int rotationDelta) {
-        dataStack.add(new Point(distanceDelta, rotationDelta));
+    public static void addRecord( float drivenDistance, float currentRotation, float sensor01Data ) {
+        dataStack.add(new Spot(drivenDistance, currentRotation, sensor01Data));
     }
 
-    public static Point getRecord() {
+    public static Spot getRecord() {
 
-        Point nextPosition = null;
+        Spot nextPosition = null;
 
         if (!dataStack.isEmpty()) {
             nextPosition = dataStack.get(0);
@@ -30,23 +30,10 @@ public class ArduinoDataStack {
 
     public static void uploadFakeValues() {
 
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(0, 90));
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(0, 90));
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(0, 90));
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(0, 90));
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(0, 90));
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(0, 90));
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(0, 90));
-        dataStack.add(new Point(200, 0));
-        dataStack.add(new Point(0, 90));
+        dataStack.add(new Spot(0, 0, 0 ));
+        dataStack.add(new Spot(0, 0, 0 ));
+        dataStack.add(new Spot(0, 0, 0 ));
+        dataStack.add(new Spot(200, 45, 0 ));
+        dataStack.add(new Spot(200, 45, 200 ));
     }
 }

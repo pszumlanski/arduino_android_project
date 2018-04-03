@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,7 +27,6 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
 
     TextView bluetoothstatus, bluetoothPaired;
-    Button btnConnect;
     Button btnStartMapping;
     ListView availableDevicesList;
 
@@ -42,11 +40,8 @@ public class MainActivity extends AppCompatActivity {
     BluetoothDevice pairedBluetoothDevice = null;
     BluetoothSocket blsocket = null ;
 
-    InputStream mmInputStream;
-    Thread workerThread;
-    byte[] readBuffer;
-    int readBufferPosition;
-    volatile boolean stopWorker;
+    public static InputStream mmInputStream;
+    public static volatile boolean stopWorker;
 
 
     @Override
@@ -57,24 +52,14 @@ public class MainActivity extends AppCompatActivity {
 
         bluetoothstatus = (TextView) findViewById(R.id.bluetooth_state);
         bluetoothPaired = (TextView) findViewById(R.id.bluetooth_paired);
-        btnConnect = (Button) findViewById(R.id.btnConnect);
         btnStartMapping = (Button) findViewById(R.id.btnStartMapping);
         availableDevicesList = (ListView) findViewById(R.id.availableDevicesList);
 
-        ListDevices = new ArrayList<BluetoothDevice>();
-        devicesList = new ArrayList<String>();
+        ListDevices = new ArrayList<>();
+        devicesList = new ArrayList<>();
 
-        adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.list_item, R.id.txtlist, devicesList);
+        adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.list_item, R.id.txtlist, devicesList);
         availableDevicesList.setAdapter(adapter);
-
-
-        btnConnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                beginListenForData();
-            }
-        });
 
         btnStartMapping.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
 
@@ -94,70 +78,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Toast.makeText(getApplicationContext(), "item with address: " + devicesList.get(i) + " clicked", Toast.LENGTH_LONG).show();
-
                 pairDevices(ListDevices.get(i));
             }
         });
-    }
-
-
-    void beginListenForData()
-    {
-        final Handler handler = new Handler();
-        final byte delimiter = 10; //This is the ASCII code for a newline character
-
-        stopWorker = false;
-        readBufferPosition = 0;
-        readBuffer = new byte[1024];
-        workerThread = new Thread(new Runnable()
-        {
-            public void run()
-            {
-                while(!Thread.currentThread().isInterrupted() && !stopWorker)
-                {
-                    try
-                    {
-                        int bytesAvailable = mmInputStream.available();
-                        if(bytesAvailable > 0)
-                        {
-                            byte[] packetBytes = new byte[bytesAvailable];
-                            mmInputStream.read(packetBytes);
-                            for(int i=0;i<bytesAvailable;i++)
-                            {
-                                byte b = packetBytes[i];
-                                if(b == delimiter)
-                                {
-                                    byte[] encodedBytes = new byte[readBufferPosition];
-                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    final String data = new String(encodedBytes, "US-ASCII");
-                                    readBufferPosition = 0;
-
-                                    handler.post(new Runnable()
-                                    {
-                                        public void run()
-                                        {
-                                            //myLabel.setText(data);
-                                            //Log.d("Read output: ", data);
-                                            Toast.makeText(getApplicationContext(), data,Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-                                }
-                                else
-                                {
-                                    readBuffer[readBufferPosition++] = b;
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        stopWorker = true;
-                    }
-                }
-            }
-        });
-
-        workerThread.start();
     }
 
 
@@ -185,34 +108,25 @@ public class MainActivity extends AppCompatActivity {
         try {
             blsocket = device.createInsecureRfcommSocketToServiceRecord(uuid);
             blsocket.connect();
+
+            try {
+                mmInputStream = blsocket.getInputStream();
+            }
+            catch(Exception e) {}
+
             pairedBluetoothDevice = device;
             bluetoothPaired.setText("Bluetooth Paired with Device: "+device.getName());
             bluetoothPaired.setTextColor(getResources().getColor(R.color.green));
 
+            btnStartMapping.setEnabled(true);
+
             Toast.makeText(getApplicationContext(), "Device paired successfully!",Toast.LENGTH_LONG).show();
-        }catch(IOException ioe)
+        }
+        catch(IOException ioe)
         {
             Log.e("taha>", "cannot connect to device :( " +ioe);
             Toast.makeText(getApplicationContext(), "Could not connect",Toast.LENGTH_LONG).show();
             pairedBluetoothDevice = null;
-        }
-    }
-
-    void send2Bluetooth(int led, int brightness)
-    {
-        //make sure there is a paired device
-        if ( pairedBluetoothDevice != null && blsocket != null )
-        {
-            try
-            {
-                taOut = blsocket.getOutputStream();
-                taOut.write(led + brightness);
-
-                taOut.flush();
-            }catch(IOException ioe)
-            {
-                Log.e( "app>" , "Could not open a output stream "+ ioe );
-            }
         }
     }
 
@@ -247,6 +161,13 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    public void startMapping() {
+
+        Intent intent = new Intent(this, MappingDisplay.class);
+        startActivity(intent);
+        //finish();
+    }
 }
 
 
