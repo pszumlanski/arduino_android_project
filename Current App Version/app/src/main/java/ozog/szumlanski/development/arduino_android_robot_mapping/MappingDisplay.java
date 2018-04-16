@@ -10,8 +10,10 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.lang.*;
@@ -27,8 +29,19 @@ public class MappingDisplay extends AppCompatActivity {
     static int acc;
 
     float currentX, currentY, currentRotation;
+    float currentMiddleX, currentMiddleY;
     float newX, newY, newRotation;
     float pointerX, pointerY;
+
+    static BufferedReader reader;
+    static String receivedDataLine;
+
+    Thread readingThread = new Thread(){
+        public void run(){
+
+            beginListenForData();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +51,9 @@ public class MappingDisplay extends AppCompatActivity {
         arduino = findViewById(R.id.arduino);
         rl = findViewById(R.id.rl);
 
-        beginListenForData();
+        //readingThread.start();
 
-        //ArduinoDataStack.uploadFakeValues();
+        ArduinoDataStack.uploadFakeValues();
 
         acc = 0;
 
@@ -63,6 +76,15 @@ public class MappingDisplay extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
+        try{
+            reader.close();
+        }
+        catch(Exception e){
+
+            Log.e("Exception: ", e.toString());
+        }
+
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
         finish();
@@ -72,15 +94,18 @@ public class MappingDisplay extends AppCompatActivity {
 
         currentX = arduino.getX();
         currentY = arduino.getY();
+
+        currentMiddleX = arduino.getX() + 100;
+        currentMiddleY = arduino.getY() + 100;
+
+        Log.d("Current X: ", Float.toString(currentX));
+        Log.d("Current Y: ", Float.toString(currentY));
+
         currentRotation = arduino.getRotation();
 
         nextPosition = ArduinoDataStack.getRecord();
 
-        // Problem, when the movement and rotation occur simultaneously.
-        // I assume it won't happen within one data transfer.
-        // Sensor Data reading only after straight movement!
-
-        // New approach - just keep that order - straight movement/rotation/sensorReading.
+        // Keep that order - straight movement/rotation/sensorReading.
 
         // Straight movement
         if (nextPosition != null && nextPosition.drivenDistance != 0) {
@@ -95,14 +120,15 @@ public class MappingDisplay extends AppCompatActivity {
         // Rotation
         if (nextPosition != null) {
             newRotation = nextPosition.currentRotation;
+
             arduino.setRotation(newRotation);
             currentRotation = newRotation;
         }
 
         // Sensor 01 Data Visualization
         if (nextPosition != null && nextPosition.sensor01Data != 0) {
-            pointerX = currentX + calculateArduinoCoordsToCartesianCoords(nextPosition.sensor01Data, currentRotation).x;
-            pointerY = currentY - calculateArduinoCoordsToCartesianCoords(nextPosition.sensor01Data, currentRotation).y;
+            pointerX = currentMiddleX + calculateArduinoCoordsToCartesianCoords(nextPosition.sensor01Data, currentRotation).x;
+            pointerY = currentMiddleY - calculateArduinoCoordsToCartesianCoords(nextPosition.sensor01Data, currentRotation).y;
 
             Log.d("CurrentX: ", Float.toString(currentX));
             Log.d("CurrentY: ", Float.toString(currentY));
@@ -126,8 +152,7 @@ public class MappingDisplay extends AppCompatActivity {
                 iv.setRotation(currentRotation);
 
                 rl.addView(iv);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -137,54 +162,52 @@ public class MappingDisplay extends AppCompatActivity {
 
         float x, y;
 
-        x = (float)Math.sin(Math.toRadians(currentRotation)) * distanceDelta;
-        y = (float)Math.cos(Math.toRadians(currentRotation)) * distanceDelta;
+        x = (float) Math.sin(Math.toRadians(currentRotation)) * distanceDelta;
+        y = (float) Math.cos(Math.toRadians(currentRotation)) * distanceDelta;
 
-        Point cartesianCoords = new Point((int)x, (int)y);
+        Point cartesianCoords = new Point((int) x, (int) y);
         return cartesianCoords;
     }
 
-    static void beginListenForData()
-    {
-        byte[] buffer = new byte[256];
-        int bytes;
+    static void beginListenForData() {
 
         Log.d("Data Listening Started", "");
 
-        // Keep looping to listen for received messages
-        while (true) {
+        reader = new BufferedReader(new InputStreamReader(MainActivity.mmInputStream));
 
-            float drivenDistance = 0;
-            float currentRotation = 0;
-            float sensor01Data = 0;
+        float drivenDistance = 0;
+        float currentRotation = 0;
+        float sensor01Data = 0;
 
-            try {
-                bytes = MainActivity.mmInputStream.read(buffer);            //read bytes from input buffer
-                String readMessage = new String(buffer, 0, bytes);
-                Log.d("MESSAGE: ", readMessage);
+        try {
+            // Keep looping to listen for received messages
+            while ((receivedDataLine = reader.readLine()) != null) {
+                System.out.println("Message: " + receivedDataLine);
+
+                acc++;
 
                 // Distance
-                if (acc % 3 == 0)
-                    drivenDistance = Float.parseFloat(readMessage);
+                if (acc % 3 == 1)
+                    drivenDistance = Float.parseFloat(receivedDataLine);
 
                 // Rotation
-                if (acc % 3 == 1)
-                    currentRotation = Float.parseFloat(readMessage);
+                if (acc % 3 == 2)
+                    currentRotation = Float.parseFloat(receivedDataLine);
 
                 // Sensor 01 Data
-                if (acc % 3 == 2) {
-                    sensor01Data = Float.parseFloat(readMessage);
+                if (acc % 3 == 0) {
+                    sensor01Data = Float.parseFloat(receivedDataLine);
                     // Send it to the stack
                     ArduinoDataStack.addRecord(drivenDistance, currentRotation, sensor01Data);
                 }
             }
-            catch (IOException e) {
-                break;
-            }
-            acc++;
         }
+        catch(Exception e){
 
-        MainActivity.stopWorker = false;
-        //workerThread.start();
+            Log.e("Exception: ", e.toString());
+        }
     }
 }
+
+
+

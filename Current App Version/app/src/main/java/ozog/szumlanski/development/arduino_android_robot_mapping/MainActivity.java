@@ -19,30 +19,48 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView bluetoothstatus, bluetoothPaired;
+    TextView bluetoothStatus, bluetoothPaired;
     Button btnStartMapping;
     ListView availableDevicesList;
 
     BluetoothAdapter myBluetooth;
     boolean status;
+
     ArrayList<String> devicesList;
     ArrayList<BluetoothDevice> ListDevices;
     ArrayAdapter<String> adapter;
-    OutputStream taOut;
 
     BluetoothDevice pairedBluetoothDevice = null;
     BluetoothSocket blsocket = null ;
 
     public static InputStream mmInputStream;
-    public static volatile boolean stopWorker;
 
+    BroadcastReceiver mReceiver = new BroadcastReceiver()
+    {
+        public void onReceive(Context context, Intent intent)
+        {
+            Log.i("Message: ", "Broadcast has been received") ;
+            String action = intent.getAction();
+
+            // When discovery finds a device
+            if (BluetoothDevice.ACTION_FOUND.equals(action))
+            {
+                // Get the BluetoothDevice object from the Intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                // Add the name and address to an array adapter to show in a ListView
+                devicesList.add(device.getName() + " @"+device.getAddress());
+                ListDevices.add(device);
+                adapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -50,10 +68,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bluetoothstatus = (TextView) findViewById(R.id.bluetooth_state);
-        bluetoothPaired = (TextView) findViewById(R.id.bluetooth_paired);
-        btnStartMapping = (Button) findViewById(R.id.btnStartMapping);
-        availableDevicesList = (ListView) findViewById(R.id.availableDevicesList);
+        bluetoothStatus = findViewById(R.id.bluetooth_state);
+        bluetoothPaired = findViewById(R.id.bluetooth_paired);
+        btnStartMapping = findViewById(R.id.btnStartMapping);
+        availableDevicesList = findViewById(R.id.availableDevicesList);
 
         ListDevices = new ArrayList<>();
         devicesList = new ArrayList<>();
@@ -93,11 +111,11 @@ public class MainActivity extends AppCompatActivity {
         myBluetooth.startDiscovery();
         if (status)
         {
-            bluetoothstatus.setText("Bluetooth State:   Enabled");
+            bluetoothStatus.setText("Bluetooth State:   Enabled");
             registerReceiver(mReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
         }
         else {
-            bluetoothstatus.setText("Bluetooth State:   Not ready");
+            bluetoothStatus.setText("Bluetooth State:   Not ready");
         }
     }
 
@@ -115,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
             catch(Exception e) {}
 
             pairedBluetoothDevice = device;
+
             bluetoothPaired.setText("Bluetooth Paired with Device: "+device.getName());
             bluetoothPaired.setTextColor(getResources().getColor(R.color.green));
 
@@ -140,27 +159,6 @@ public class MainActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
     }
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver()
-    {
-        public void onReceive(Context context, Intent intent)
-        {
-            Log.i("app>", "broadcast received") ;
-            String action = intent.getAction();
-
-            // When discovery finds a device
-            if (BluetoothDevice.ACTION_FOUND.equals(action))
-            {
-                // Get the BluetoothDevice object from the Intent
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // Add the name and address to an array adapter to show in a ListView
-                devicesList.add(device.getName() + " @"+device.getAddress());
-                ListDevices.add(device);
-
-                adapter.notifyDataSetChanged();
-            }
-        }
-    };
 
     public void startMapping() {
 

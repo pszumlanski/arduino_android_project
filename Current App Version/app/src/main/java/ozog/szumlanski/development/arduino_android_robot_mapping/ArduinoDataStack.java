@@ -1,6 +1,5 @@
 package ozog.szumlanski.development.arduino_android_robot_mapping;
 
-import android.graphics.Point;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,10 +29,13 @@ public class ArduinoDataStack {
 
     public static void uploadFakeValues() {
 
-        dataStack.add(new Spot(0, 0, 0 ));
-        dataStack.add(new Spot(0, 0, 0 ));
-        dataStack.add(new Spot(0, 0, 0 ));
-        dataStack.add(new Spot(200, 45, 0 ));
-        dataStack.add(new Spot(200, 45, 200 ));
+        dataStack.add(new Spot(0, 0, 200 ));
+        dataStack.add(new Spot(0, 45, 200 ));
+        dataStack.add(new Spot(0, 90, 200 ));
+        dataStack.add(new Spot(0, 135, 200 ));
+        dataStack.add(new Spot(0, 180, 200 ));
+        dataStack.add(new Spot(100, 180, 200 ));
+        dataStack.add(new Spot(0, 135, 200 ));
+        dataStack.add(new Spot(0, 90, 200 ));
     }
 }
