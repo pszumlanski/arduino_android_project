@@ -51,8 +51,10 @@ public class MappingDisplay extends AppCompatActivity {
         arduino = findViewById(R.id.arduino);
         rl = findViewById(R.id.rl);
 
+        //Starting a thread to read data and store to stack. Uncomment to work with arduino
         //readingThread.start();
 
+        //fake values for testing. Commend this out to work with arduino
         ArduinoDataStack.uploadFakeValues();
 
         acc = 0;

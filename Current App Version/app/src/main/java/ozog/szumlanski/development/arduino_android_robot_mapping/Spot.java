@@ -8,8 +8,8 @@ public class Spot {
 
     Spot(float drivenDistance, float currentRotation, float sensor01Data) {
 
-        this.drivenDistance = drivenDistance;
-        this.currentRotation = currentRotation;
-        this.sensor01Data = sensor01Data;
+        this.drivenDistance = drivenDistance; //distance driven from the previous point
+        this.currentRotation = currentRotation; //rotation from the starting position
+        this.sensor01Data = sensor01Data; //ultrasonic sensor data
     }
 }

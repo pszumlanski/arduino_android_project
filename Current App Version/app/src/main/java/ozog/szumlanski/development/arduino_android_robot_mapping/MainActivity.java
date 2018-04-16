@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
-
+        //remove this or line 115
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
 

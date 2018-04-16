@@ -1,3 +1,6 @@
+//stack with Spot data
+
+
 package ozog.szumlanski.development.arduino_android_robot_mapping;
 
 import java.util.LinkedList;
@@ -29,8 +32,8 @@ public class ArduinoDataStack {
 
     public static void uploadFakeValues() {
 
-        dataStack.add(new Spot(0, 0, 200 ));
-        dataStack.add(new Spot(0, 45, 200 ));
+        dataStack.add(new Spot(0, 0, 500 ));
+        dataStack.add(new Spot(0, 23, 400 ));
         dataStack.add(new Spot(0, 90, 200 ));
         dataStack.add(new Spot(0, 135, 200 ));
         dataStack.add(new Spot(0, 180, 200 ));
