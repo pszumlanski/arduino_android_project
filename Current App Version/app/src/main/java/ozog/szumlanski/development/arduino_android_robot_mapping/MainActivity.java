@@ -53,11 +53,12 @@ public class MainActivity extends AppCompatActivity {
             {
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                // Add the name and address to an array adapter to show in a ListView
-                devicesList.add(device.getName() + " @"+device.getAddress());
-                ListDevices.add(device);
-                adapter.notifyDataSetChanged();
+                if(!ListDevices.contains(device)) {
+                    // Add the name and address to an array adapter to show in a ListView
+                    devicesList.add(device.getName() + " @"+device.getAddress());
+                    ListDevices.add(device);
+                    adapter.notifyDataSetChanged();
+                }
             }
         }
     };
@@ -83,9 +84,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent(getApplicationContext(), MappingDisplay.class);
-                startActivity(intent);
-                finish();
+                startMapping();
             }
         });
         //remove this or line 115

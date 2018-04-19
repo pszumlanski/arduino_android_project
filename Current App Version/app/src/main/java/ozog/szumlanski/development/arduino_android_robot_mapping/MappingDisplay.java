@@ -52,10 +52,10 @@ public class MappingDisplay extends AppCompatActivity {
         rl = findViewById(R.id.rl);
 
         //Starting a thread to read data and store to stack. Uncomment to work with arduino
-        //readingThread.start();
+        readingThread.start();
 
         //fake values for testing. Commend this out to work with arduino
-        ArduinoDataStack.uploadFakeValues();
+        //ArduinoDataStack.uploadFakeValues();
 
         acc = 0;
 
@@ -180,6 +180,9 @@ public class MappingDisplay extends AppCompatActivity {
         float drivenDistance = 0;
         float currentRotation = 0;
         float sensor01Data = 0;
+        float sensor02Data = 0;
+        float sensor03Data = 0;
+        float sensor04Data = 0;
 
         try {
             // Keep looping to listen for received messages
@@ -189,18 +192,29 @@ public class MappingDisplay extends AppCompatActivity {
                 acc++;
 
                 // Distance
-                if (acc % 3 == 1)
+                if (acc % 6 == 1)
                     drivenDistance = Float.parseFloat(receivedDataLine);
 
                 // Rotation
-                if (acc % 3 == 2)
+                if (acc % 6 == 2)
                     currentRotation = Float.parseFloat(receivedDataLine);
 
                 // Sensor 01 Data
-                if (acc % 3 == 0) {
+                if (acc % 6 == 3)
                     sensor01Data = Float.parseFloat(receivedDataLine);
+
+                // Sensor 02 Data
+                if (acc % 6 == 4)
+                    sensor02Data = Float.parseFloat(receivedDataLine);
+
+                // Sensor 03 Data
+                if(acc % 6 == 5)
+                    sensor03Data = Float.parseFloat(receivedDataLine);
+
+                if(acc % 6 == 0) {
+                    sensor04Data = Float.parseFloat(receivedDataLine);
                     // Send it to the stack
-                    ArduinoDataStack.addRecord(drivenDistance, currentRotation, sensor01Data);
+                    ArduinoDataStack.addRecord(drivenDistance, currentRotation, sensor01Data, sensor02Data, sensor03Data, sensor04Data);
                 }
             }
         }
